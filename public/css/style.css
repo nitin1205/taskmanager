@@ -1,0 +1,21 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-family: 'Share Tech Mono', monospace;
+    font-family: 2.5rem;
+}
+
+body {
+    min-height: 100vh;
+    background-color: rgb(30, 32, 33);
+    color: whitesmoke;
+    display: grid;
+    place-content: center;
+    padding: 1rem;
+}
