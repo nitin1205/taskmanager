@@ -15,6 +15,7 @@ const crosOptions = require('./config/corsOptions');
 const PORT = process.env.PORT || 3000;
 
 console.log(process.env.NODE_ENV);
+mongoose.set("strictQuery", false);
 
 connectDB();
 
@@ -29,6 +30,7 @@ app.use(cors(crosOptions));
 app.use('/', express.static(path.join(__dirname, 'public')));
 
 app.use('/', require('./routes/root'));
+app.use('/users', require('./routes/userRoutes'));
 
 app.all('*', (req, res) => {
     res.status(404);
