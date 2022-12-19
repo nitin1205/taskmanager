@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler');
 
 const Note = require('../models/Note');
+const User = require('../models/User');
 
 const getAllNotes = asyncHandler(async (req, res) => {
     const notes = await Note.find().lean();
@@ -8,13 +9,20 @@ const getAllNotes = asyncHandler(async (req, res) => {
     if (!notes?.length) {
         return res.status(400).json({ message: 'No notes found' });
     }
-    res.json(notes);
+
+    const notesWithUser = await Promise.all(notes.map(async (note) => {
+        const user = await User.findById(note.user).lean().exec()
+        return { ...note, username: user.username } 
+    }))
+
+    res.json(notesWithUser)
+
 });
 
 const createNewNote = asyncHandler(async (req, res) => {
-    const { username, title, text } = req.body;
+    const { user, title, text } = req.body;
 
-    if (!username || !title || !text) {
+    if (!user || !title || !text) {
         return res.status(400).json({ message: 'All fields are required' });
     };
 
@@ -25,7 +33,7 @@ const createNewNote = asyncHandler(async (req, res) => {
     };
 
     
-    const noteObject = { username, title, text };
+    const noteObject = { user, title, text };
     
     const note = await Note.create(noteObject);
 
@@ -38,9 +46,9 @@ const createNewNote = asyncHandler(async (req, res) => {
 });
 
 const updateNote = asyncHandler(async (req, res) => {
-    const { id, username, title, text, completed } = req.body;
+    const { id, user, title, text, completed } = req.body;
 
-    if (!id || !username || !title || !text || !completed) {
+    if (!id || !user || !title || !text || typeof completed !== 'boolean') {
         return res.status(400).json({ message: 'All fields are required' });
     }
 
@@ -56,8 +64,8 @@ const updateNote = asyncHandler(async (req, res) => {
         return res.status(409).json({ message: 'Duplicate title' });
     }
 
-    note.username = username;
-    note.title = username;
+    note.user = user;
+    note.title = title;
     note.text = text;
     note.completed = completed;
 
@@ -81,7 +89,7 @@ const deleteNote = asyncHandler(async (req, res) => {
 
     const result = await note.deleteOne();
 
-    const reply = `Username ${result.title} with ID ${result._id} has been deleted`;
+    const reply = `Note ${result.title} with ID ${result._id} has been deleted`;
 
     res.json(reply);
 
@@ -89,8 +97,8 @@ const deleteNote = asyncHandler(async (req, res) => {
 
 
 module.exports = {
-    getAllUser,
-    createNewUser,
-    updateUser,
-    deleteUser
+    getAllNotes,
+    createNewNote,
+    updateNote,
+    deleteNote
 }
