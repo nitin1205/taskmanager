@@ -26,7 +26,7 @@ const createNewNote = asyncHandler(async (req, res) => {
         return res.status(400).json({ message: 'All fields are required' });
     };
 
-    const duplicate = await Note.findOne({ title }).lean().exec();
+    const duplicate = await Note.findOne({ title }).collation({ locale: 'en', strength: 2 }).lean().exec();
 
     if (duplicate) {
         return res.status(409).json({ message: 'Note already assigned' });
@@ -34,11 +34,11 @@ const createNewNote = asyncHandler(async (req, res) => {
 
     
     const noteObject = { user, title, text };
-    
-    const note = await Note.create(noteObject);
-
+    console.log('note object created')
+    const note = await Note.create({ user, title, text });
+    console.log('note created')
     if (note) {
-        res.status(201).json({ message: `New note ${title}} created` });
+        res.status(201).json({ message: `New note ${title} created` });
     } else {
         res.status(400).json({ message: 'Invalid data recieved' });
     }
@@ -58,7 +58,7 @@ const updateNote = asyncHandler(async (req, res) => {
         return res.status(400).json({ message: 'Note not found' });
     }
 
-    const duplicate = await Note.findOne({ title }).lean().exec();
+    const duplicate = await Note.findOne({ title }).collation({ locale: 'en', strength: 2 }).lean().exec();
 
     if(duplicate && duplicate?._id.toString() !== id) {
         return res.status(409).json({ message: 'Duplicate title' });
